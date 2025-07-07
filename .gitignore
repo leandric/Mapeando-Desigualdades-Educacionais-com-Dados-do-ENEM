@@ -6,8 +6,17 @@ __pycache__/
 # C extensions
 *.so
 
+
+#airflow
+Airflow/*.db
+#Airflow/*.cfg
+Airflow/*.generated
+Airflow/logs/
+Airflow/downloads_enem/
+
+
 # Distribution / packaging
-.Python
+
 build/
 develop-eggs/
 dist/
