@@ -1,0 +1,8 @@
+{
+    "EXTRACAO": {
+        "ENEM": {
+            "ANO": 2023,
+            "PATH":"data/raw"
+        }
+    }
+}
