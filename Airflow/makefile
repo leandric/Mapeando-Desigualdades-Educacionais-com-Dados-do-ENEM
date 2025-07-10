@@ -8,7 +8,8 @@ airflow-init:
 	@echo "Ativando ambiente virtual e configurando Airflow..."
 	@mkdir -p dags data
 	@. venv/bin/activate && \
-	export AIRFLOW_HOME=/home/leandric/Documents/Mapeando-Desigualdades-Educacionais-com-Dados-do-ENEM/Airflow && \
+	export AIRFLOW_HOME="$(CURDIR)" && \
+	export AIRFLOW__CORE__LOAD_EXAMPLES=False && \
 	AIRFLOW_VERSION=3.0.2 && \
 	PYTHON_VERSION="$$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')" && \
 	CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-$${AIRFLOW_VERSION}/constraints-$${PYTHON_VERSION}.txt" && \
@@ -20,6 +21,7 @@ airflow-init:
 
 up-airflow:
 	@echo "Iniciando o Airflow em modo standalone..."
-	@export AIRFLOW_HOME=/home/leandric/Documents/Mapeando-Desigualdades-Educacionais-com-Dados-do-ENEM/Airflow && \
+	@export AIRFLOW_HOME="$(CURDIR)" && \
+	export AIRFLOW__CORE__LOAD_EXAMPLES=False && \
 	. venv/bin/activate && \
 	airflow standalone
