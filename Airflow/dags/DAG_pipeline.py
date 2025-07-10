@@ -1,20 +1,27 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime
-from airflow.sdk import Variable
+
+from airflow.models import Variable
 from airflow.utils.trigger_rule import TriggerRule
 
-
+from utils.unzip import extrair_zips
 from utils.get_enem_zip_files import baixar_microdados_enem
-
 
 #========================== Define functions =========================
 
 def extract(**kwargs):
     confs = Variable.get('EXTRACAO', deserialize_json=True)
-    return baixar_microdados_enem(ano= confs['ENEM']['ANO'], 
-                                  pasta_destino= confs['ENEM']['path'])
+    print('=================================================', confs)
+    return baixar_microdados_enem(
+        ano=confs['ENEM']['ANO'], 
+        pasta_destino=confs['ENEM']['PATH']
+    )
 
+def unzip(**kwargs):
+    ti = kwargs['ti']
+    file_path = ti.xcom_pull(task_ids='download')
+    print(f"📦 Extraindo: {file_path}")
+    extrair_zips(file_path, file_path)
 
 #========================== DAGs Definitions =========================
 
@@ -23,13 +30,18 @@ with DAG(
     schedule='@daily',
     description='Pipeline de dados do processo',
     catchup=False,
-    tags=['Pipeline',]
+    tags=['Pipeline'],
 ) as dag:
-    
+
     task_download = PythonOperator(
-        task_id='dowload',
-        python_callable=baixar_microdados_enem
+        task_id='download',
+        python_callable=extract,
     )
 
-#========================== Task flow =========================
-task_download
+    task_unzip = PythonOperator(
+        task_id='unzip',
+        python_callable=unzip,
+    )
+
+    #========================== Task flow =========================
+    task_download >> task_unzip

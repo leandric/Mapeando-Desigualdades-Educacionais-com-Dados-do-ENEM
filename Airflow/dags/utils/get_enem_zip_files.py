@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import os
+from utils.rash import gerar_hash_aleatorio
 
 def baixar_microdados_enem(ano: int, pasta_destino: str = "data/raw", **kwargs) -> str:
     """
@@ -9,10 +10,17 @@ def baixar_microdados_enem(ano: int, pasta_destino: str = "data/raw", **kwargs) 
 
     Parâmetros:
     - ano (int): Ano desejado (ex: 2020)
-    - pasta_destino (str): Caminho da pasta onde o arquivo será salvo (default: "data/raw")
+    - pasta_destino (str): Caminho da pasta onde o subdiretório com hash será criado (default: "data/raw")
+
+    Retorna:
+    - Caminho completo do arquivo baixado.
     """
-    # Cria a pasta de destino se não existir
-    os.makedirs(pasta_destino, exist_ok=True)
+    # Gera o hash e define o caminho completo de destino
+    hash_dir = gerar_hash_aleatorio()
+    destino_completo = os.path.join(pasta_destino, hash_dir)
+
+    # Cria o diretório com o hash
+    os.makedirs(destino_completo, exist_ok=True)
 
     # URL da página do INEP
     url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem"
@@ -44,8 +52,8 @@ def baixar_microdados_enem(ano: int, pasta_destino: str = "data/raw", **kwargs) 
         print(f"❌ Nenhum arquivo encontrado para o ano {ano}.")
         return
 
-    # Baixa o arquivo
-    nome_arquivo = os.path.join(pasta_destino, f"microdados_enem_{ano}.zip")
+    # Caminho final do arquivo dentro da pasta com o hash
+    nome_arquivo = os.path.join(destino_completo, f"microdados_enem_{ano}.zip")
     print(f"⬇ Baixando {ano} de {link_encontrado}")
     with requests.get(link_encontrado, stream=True) as r:
         r.raise_for_status()
@@ -54,7 +62,4 @@ def baixar_microdados_enem(ano: int, pasta_destino: str = "data/raw", **kwargs) 
                 f.write(chunk)
     print(f"✔ Arquivo {ano} salvo em {nome_arquivo}\n")
 
-
-
-if __name__ == '__main__':
-    pass
+    return nome_arquivo
